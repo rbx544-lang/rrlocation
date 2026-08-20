@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>RR Location — Renault Clio 5 en location à Longwy</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Location d'une Renault Clio 5 (2019) à Longwy. Kilométrage illimité, CarPlay, ciel étoilé, dès 50€/jour. Réservation en ligne, sans condition d'âge.">
+<meta name="author" content="RR Location">
+
+<link rel="icon" href="images/rr-logo.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- fond étoilé (signature visuelle : le ciel étoilé de l'habitacle) -->
+<div class="starfield" aria-hidden="true"></div>
+
+<!-- HEADER -->
+<header id="header">
+  <div class="wrap">
+    <a href="#top" class="logo">
+      <img src="images/rr-logo.png" alt="" class="logo-mark">
+      <span>RR<em>Location</em></span>
+    </a>
+
+    <nav id="nav">
+      <a href="#vehicule">Le véhicule</a>
+      <a href="#tarifs">Tarifs</a>
+      <a href="#reservation">Réservation</a>
+      <a href="#conditions">Conditions</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <a href="#reservation" class="btn btn-accent header-cta">Réserver</a>
+    <button id="burger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-media" id="carHero">
+      <canvas id="carCanvas"></canvas>
+      <img id="heroFallback" src="images/clio/clio-trois-quarts.png" alt="Renault Clio 5 rouge, RR Location, Longwy" style="display:none;">
+      <div class="hero-fade"></div>
+    </div>
+
+    <div class="hero-content">
+      <p class="eyebrow"><span class="dot"></span> Véhicule unique · Longwy &amp; alentours</p>
+      <h1>Votre Renault Clio 5 vous attend.</h1>
+      <p class="hero-text">Modèle 2019, essence 100&nbsp;ch, boîte manuelle, équipée de CarPlay, d'un ciel étoilé, d'un éclairage LED d'ambiance et du kilométrage illimité. Un véhicule parfaitement entretenu pour des trajets confortables et en toute sérénité.</p>
+      <div class="hero-actions">
+        <a href="#reservation" class="btn btn-accent">Vérifier les disponibilités</a>
+        <a href="#tarifs" class="btn btn-ghost">Voir les tarifs</a>
+      </div>
+    </div>
+
+    <a href="#vehicule" class="scroll-cue" aria-label="Défiler">
+      <i class="fa-solid fa-chevron-down"></i>
+    </a>
+  </section>
+
+  <!-- STRIP INFOS RAPIDES -->
+  <section class="strip">
+    <div class="wrap strip-grid">
+      <div><i class="fa-solid fa-gauge-high"></i><span>Km illimité</span></div>
+      <div><i class="fa-solid fa-id-card"></i><span>Permis + CI</span></div>
+      <div><i class="fa-solid fa-cake-candles"></i><span>Sans condition d'âge</span></div>
+      <div><i class="fa-solid fa-location-dot"></i><span>Longwy uniquement</span></div>
+    </div>
+  </section>
+
+  <!-- VEHICULE -->
+  <section id="vehicule" class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow"><span class="dot"></span> Le véhicule</p>
+        <h2>Renault Clio 5 <span class="year">— 2019</span></h2>
+      </div>
+
+      <div class="vehicle-grid">
+        <div class="vehicle-gallery">
+          <div class="gallery-main">
+            <img id="galleryMain" src="images/clio/clio-avant.png" alt="Renault Clio 5 rouge, vue avant">
+            <button class="gallery-arrow gallery-prev" type="button" aria-label="Photo précédente"><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="gallery-arrow gallery-next" type="button" aria-label="Photo suivante"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+          <div class="gallery-thumbs">
+            <button class="thumb active" data-src="images/clio/clio-avant.png">
+              <img src="images/clio/clio-avant.png" alt="Vue avant">
+            </button>
+            <button class="thumb" data-src="images/clio/clio-trois-quarts.png">
+              <img src="images/clio/clio-trois-quarts.png" alt="Vue trois-quarts">
+            </button>
+            <button class="thumb" data-src="images/clio/clio-profil.png">
+              <img src="images/clio/clio-profil.png" alt="Vue de profil">
+            </button>
+            <button class="thumb" data-src="images/clio/clio-arriere.png">
+              <img src="images/clio/clio-arriere.png" alt="Vue arrière">
+            </button>
+          </div>
+        </div>
+
+        <div class="vehicle-dash">
+          <p class="dash-label">Fiche technique</p>
+          <ul class="dash-grid">
+            <li><span class="dash-num">101</span><span class="dash-unit">ch</span><small>Essence</small></li>
+            <li><span class="dash-num">2019</span><span class="dash-unit"></span><small>Année</small></li>
+            <li><span class="dash-num">M</span><span class="dash-unit">5</span><small>Boîte manuelle</small></li>
+            <li><span class="dash-num">∞</span><span class="dash-unit"></span><small>Km illimité</small></li>
+          </ul>
+
+          <ul class="feature-list">
+            <li><i class="fa-solid fa-star"></i> Ciel étoilé dans l'habitacle</li>
+            <li><i class="fa-solid fa-lightbulb"></i> Éclairage LED intérieur</li>
+            <li><i class="fa-solid fa-mobile-screen-button"></i> Apple CarPlay</li>
+            <li><i class="fa-solid fa-gauge"></i> Compteur digital</li>
+            <li><i class="fa-solid fa-arrows-left-right-to-line"></i> Régulateur de vitesse</li>
+            <li><i class="fa-solid fa-road"></i> Kilométrage illimité</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TARIFS -->
+  <section id="tarifs" class="section section-dark">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow"><span class="dot"></span> Tarifs</p>
+        <h2>Un prix qui baisse avec la durée</h2>
+      </div>
+
+      <div class="price-grid">
+        <div class="price-card">
+          <p class="price-name">À la journée</p>
+          <p class="price-amount"><span>60</span>€<small>/jour</small></p>
+          <p class="price-note">Pour 1 à 6 jours</p>
+        </div>
+
+        <div class="price-card featured">
+          <p class="price-tag">Le plus choisi</p>
+          <p class="price-name">Dès 7 jours</p>
+          <p class="price-amount"><span>50</span>€<small>/jour</small></p>
+          <p class="price-note">À partir d'une semaine</p>
+        </div>
+
+        <div class="price-card">
+          <p class="price-name">Au mois</p>
+          <p class="price-amount"><span>1050</span>€<small>/mois</small></p>
+          <p class="price-note">Forfait mensuel</p>
+        </div>
+      </div>
+
+      <div class="price-footnote">
+        <div><i class="fa-solid fa-shield-halved"></i> Caution de 1000€, restituée en fin de location</div>
+        <div><i class="fa-solid fa-road"></i> Kilométrage illimité inclus, quel que soit le tarif</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESERVATION -->
+  <section id="reservation" class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow"><span class="dot"></span> Réservation</p>
+        <h2>Choisissez vos dates</h2>
+        <p class="section-sub">Sélectionnez un jour de départ, puis un jour de retour. Le prix se calcule automatiquement.</p>
+      </div>
+
+      <div class="booking-grid">
+        <div class="calendar-card">
+          <div class="calendar-nav">
+            <button id="prevMonth" aria-label="Mois précédent"><i class="fa-solid fa-chevron-left"></i></button>
+            <p id="calendarLabel">—</p>
+            <button id="nextMonth" aria-label="Mois suivant"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+          <div class="calendar-weekdays">
+            <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
+          </div>
+          <div id="calendarGrid" class="calendar-grid"></div>
+          <div class="calendar-legend">
+            <span><i class="legend-dot legend-selected"></i> Sélectionné</span>
+            <span><i class="legend-dot legend-booked"></i> Indisponible</span>
+          </div>
+        </div>
+
+        <form id="bookingForm" class="booking-form">
+          <div class="booking-summary">
+            <div>
+              <p class="bs-label">Départ</p>
+              <p id="startLabel" class="bs-value">—</p>
+            </div>
+            <i class="fa-solid fa-arrow-right-long"></i>
+            <div>
+              <p class="bs-label">Retour</p>
+              <p id="endLabel" class="bs-value">—</p>
+            </div>
+          </div>
+
+          <div class="booking-total">
+            <span id="nightsLabel">0 jour</span>
+            <span id="totalLabel">0 €</span>
+          </div>
+
+          <label>Nom et prénom
+            <input type="text" name="name" required placeholder="Votre nom">
+          </label>
+          <label>Téléphone
+            <input type="tel" name="phone" required placeholder="06 00 00 00 00">
+          </label>
+
+          <button type="submit" class="btn btn-accent" id="submitBooking">Envoyer ma demande par SMS</button>
+          <p class="booking-hint">Aucun paiement en ligne : votre demande m'est envoyée directement, je vous confirme par téléphone ou Snapchat.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONDITIONS -->
+  <section id="conditions" class="section section-dark">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow"><span class="dot"></span> Conditions</p>
+        <h2>Simple et sans surprise</h2>
+      </div>
+
+      <div class="conditions-grid">
+        <div class="cond-card">
+          <i class="fa-solid fa-id-card"></i>
+          <h3>Permis + carte d'identité</h3>
+          <p>Permis de conduire valide et carte d'identité à présenter au départ de la location.</p>
+        </div>
+        <div class="cond-card">
+          <i class="fa-solid fa-cake-candles"></i>
+          <h3>Aucune condition d'âge</h3>
+          <p>Le permis suffit, aucune limite d'âge minimum ou maximum n'est imposée.</p>
+        </div>
+        <div class="cond-card">
+          <i class="fa-solid fa-shield-halved"></i>
+          <h3>Caution de 1000€</h3>
+          <p>Demandée au départ, restituée intégralement au retour du véhicule en bon état.</p>
+        </div>
+        <div class="cond-card">
+          <i class="fa-solid fa-location-dot"></i>
+          <h3>Longwy uniquement</h3>
+          <p>Prise en charge et retour du véhicule exclusivement sur Longwy et ses environs.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="section">
+    <div class="wrap contact-grid">
+      <div>
+        <p class="eyebrow"><span class="dot"></span> Contact</p>
+        <h2>Une seule voiture, une seule personne à joindre</h2>
+        <p class="section-sub">Pour toute question ou pour confirmer une réservation, contactez-moi directement.</p>
+
+        <div class="contact-list">
+          <a href="tel:0662481112" class="contact-item">
+            <i class="fa-solid fa-phone"></i>
+            <div><span>Téléphone</span><strong>06 62 48 11 12</strong></div>
+          </a>
+          <a href="https://snapchat.com/add/rubn.374" target="_blank" rel="noopener" class="contact-item">
+            <i class="fa-brands fa-snapchat"></i>
+            <div><span>Snapchat</span><strong>rubn.374</strong></div>
+          </a>
+          <div class="contact-item no-link">
+            <i class="fa-solid fa-location-dot"></i>
+            <div><span>Zone de location</span><strong>Longwy, France</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="map-frame">
+        <iframe src="https://maps.google.com/maps?q=Longwy%2C%20France&t=&z=12&ie=UTF8&iwloc=&output=embed" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Localisation Longwy"></iframe>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap footer-grid">
+    <div class="footer-brand">
+      <img src="images/rr-logo.png" alt="RR Location" class="footer-sticker">
+      <p>RR Location<br><span>Longwy, France</span></p>
+    </div>
+    <div class="footer-links">
+      <a href="#vehicule">Le véhicule</a>
+      <a href="#tarifs">Tarifs</a>
+      <a href="#reservation">Réservation</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="footer-socials">
+      <a href="tel:0662481112" aria-label="Téléphone"><i class="fa-solid fa-phone"></i></a>
+      <a href="https://snapchat.com/add/rubn.374" target="_blank" rel="noopener" aria-label="Snapchat"><i class="fa-brands fa-snapchat"></i></a>
+    </div>
+  </div>
+  <p class="footer-copy">© 2026 RR Location — Tous droits réservés</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="js/car3d.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

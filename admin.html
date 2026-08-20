@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>RR Location — Gestion des disponibilités (privé)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  :root{
+    --bg:#0b0b0d; --card:#18181e; --card-line:rgba(255,255,255,.08);
+    --red:#e2141f; --red-dim:#8f0f18; --text:#f5f3ee; --text-dim:#a3a3ab;
+    --text-faint:#6b6b73; --radius:18px; --green:#2fae62;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  body{ background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; padding:32px 18px 80px; }
+  h1{ font-family:'Space Grotesk',sans-serif; font-size:26px; margin-bottom:6px; }
+  .wrap{ max-width:640px; margin:0 auto; }
+  .sub{ color:var(--text-dim); font-size:14px; margin-bottom:28px; line-height:1.5; }
+  .card{ background:var(--card); border:1px solid var(--card-line); border-radius:var(--radius); padding:22px; }
+  .cal-nav{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .cal-nav button{ background:none; border:none; color:var(--text); font-size:16px; cursor:pointer; width:38px; height:38px; border-radius:10px; }
+  .cal-nav button:hover{ background:rgba(255,255,255,.08); }
+  .cal-nav p{ font-family:'Space Grotesk',sans-serif; font-weight:600; text-transform:capitalize; }
+  .weekdays{ display:grid; grid-template-columns:repeat(7,1fr); text-align:center; color:var(--text-faint); font-size:12px; margin-bottom:6px; }
+  .grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+  .day{ aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:10px; font-size:14px; cursor:pointer; background:rgba(255,255,255,.03); border:1px solid transparent; transition:all .15s; user-select:none; }
+  .day:hover{ border-color:var(--text-faint); }
+  .day.empty{ visibility:hidden; cursor:default; }
+  .day.past{ color:var(--text-faint); opacity:.35; cursor:default; pointer-events:none; }
+  .day.blocked{ background:var(--red-dim); color:#fff; font-weight:600; }
+  .day.today{ box-shadow:inset 0 0 0 1px var(--text-dim); }
+  .legend{ display:flex; gap:18px; margin-top:16px; font-size:12px; color:var(--text-dim); }
+  .legend span{ display:flex; align-items:center; gap:6px; }
+  .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; }
+  .dot.blocked{ background:var(--red-dim); }
+  .dot.free{ background:rgba(255,255,255,.15); }
+  .actions{ display:flex; gap:12px; margin-top:24px; flex-wrap:wrap; }
+  .btn{ flex:1; min-width:180px; padding:14px 18px; border-radius:12px; font-weight:600; font-size:14px; cursor:pointer; border:1px solid var(--card-line); background:transparent; color:var(--text); text-align:center; }
+  .btn-accent{ background:var(--red); border-color:var(--red); color:#fff; }
+  .btn-accent:hover{ background:var(--red-dim); }
+  .btn:hover{ background:rgba(255,255,255,.06); }
+  .count{ font-size:13px; color:var(--text-dim); margin-top:14px; }
+  .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--green); color:#fff; padding:12px 20px; border-radius:10px; font-size:14px; font-weight:600; opacity:0; pointer-events:none; transition:all .25s; }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  .file-input{ display:none; }
+  code{ background:rgba(255,255,255,.06); padding:2px 6px; border-radius:6px; font-size:12.5px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Gestion des disponibilités</h1>
+    <p class="sub">
+      Cliquez sur les jours où la Clio n'est <strong>pas</strong> disponible (déjà réservée, entretien, etc.).
+      Un clic bloque le jour, un second clic le débloque. Une fois terminé, cliquez sur
+      <strong>« Télécharger le fichier »</strong> puis remplacez <code>data/disponibilites.json</code>
+      dans votre site par le fichier téléchargé. Cette page n'est pas liée depuis le site public —
+      gardez son adresse pour vous uniquement.
+    </p>
+
+    <div class="card">
+      <div class="cal-nav">
+        <button id="prevMonth" aria-label="Mois précédent"><i class="fa-solid fa-chevron-left"></i></button>
+        <p id="calLabel">—</p>
+        <button id="nextMonth" aria-label="Mois suivant"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+      <div class="weekdays"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+      <div id="grid" class="grid"></div>
+      <div class="legend">
+        <span><i class="dot free"></i> Disponible</span>
+        <span><i class="dot blocked"></i> Indisponible</span>
+      </div>
+      <p class="count" id="countLabel">0 jour bloqué</p>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="importBtn"><i class="fa-solid fa-upload"></i>&nbsp; Importer le fichier actuel</button>
+      <button class="btn btn-accent" id="downloadBtn"><i class="fa-solid fa-download"></i>&nbsp; Télécharger le fichier</button>
+    </div>
+    <input type="file" id="fileInput" class="file-input" accept="application/json">
+  </div>
+
+  <div class="toast" id="toast">Fichier téléchargé</div>
+
+<script>
+(function(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  let viewYear = today.getFullYear();
+  let viewMonth = today.getMonth();
+  let blocked = new Set();
+
+  const grid = document.getElementById('grid');
+  const calLabel = document.getElementById('calLabel');
+  const countLabel = document.getElementById('countLabel');
+  const monthFmt = new Intl.DateTimeFormat('fr-FR', { month:'long', year:'numeric' });
+
+  const toKey = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+  function render(){
+    grid.innerHTML = '';
+    calLabel.textContent = monthFmt.format(new Date(viewYear, viewMonth, 1));
+    const firstDay = new Date(viewYear, viewMonth, 1);
+    const offset = (firstDay.getDay() + 6) % 7;
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+    for (let i = 0; i < offset; i++){
+      const e = document.createElement('div');
+      e.className = 'day empty';
+      grid.appendChild(e);
+    }
+    for (let d = 1; d <= daysInMonth; d++){
+      const date = new Date(viewYear, viewMonth, d);
+      const key = toKey(date);
+      const cell = document.createElement('div');
+      cell.className = 'day';
+      cell.textContent = d;
+      if (date.getTime() === today.getTime()) cell.classList.add('today');
+      if (date < today) cell.classList.add('past');
+      if (blocked.has(key)) cell.classList.add('blocked');
+      cell.addEventListener('click', () => {
+        if (date < today) return;
+        blocked.has(key) ? blocked.delete(key) : blocked.add(key);
+        render();
+      });
+      grid.appendChild(cell);
+    }
+    countLabel.textContent = blocked.size + (blocked.size > 1 ? ' jours bloqués' : ' jour bloqué');
+  }
+
+  document.getElementById('prevMonth').addEventListener('click', () => {
+    viewMonth--; if (viewMonth < 0){ viewMonth = 11; viewYear--; } render();
+  });
+  document.getElementById('nextMonth').addEventListener('click', () => {
+    viewMonth++; if (viewMonth > 11){ viewMonth = 0; viewYear++; } render();
+  });
+
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  document.getElementById('downloadBtn').addEventListener('click', () => {
+    const dates = Array.from(blocked).sort();
+    const blob = new Blob([JSON.stringify(dates, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'disponibilites.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Fichier téléchargé — remplacez data/disponibilites.json');
+  });
+
+  const fileInput = document.getElementById('fileInput');
+  document.getElementById('importBtn').addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const dates = JSON.parse(reader.result);
+        blocked = new Set(Array.isArray(dates) ? dates : []);
+        render();
+        showToast('Fichier importé');
+      } catch (e) {
+        showToast('Fichier invalide');
+      }
+    };
+    reader.readAsText(file);
+    fileInput.value = '';
+  });
+
+  // essaie de pré-charger le fichier existant du site (s'il est servi
+  // depuis le même dossier, via http:// et non file://)
+  fetch('data/disponibilites.json')
+    .then(r => r.ok ? r.json() : [])
+    .then(dates => { blocked = new Set(Array.isArray(dates) ? dates : []); render(); })
+    .catch(() => render());
+
+  render();
+})();
+</script>
+</body>
+</html>
