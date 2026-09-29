@@ -46,16 +46,19 @@ document.addEventListener('DOMContentLoaded', () => {
   /* =========================================================
      CALENDRIER DE RÉSERVATION
 
-     Les dates indisponibles sont lues depuis data/disponibilites.json.
-     Pour les mettre à jour sans toucher au code, ouvrez admin.html,
-     cliquez sur les jours à bloquer/débloquer, téléchargez le fichier
-     généré et remplacez data/disponibilites.json sur le site.
+     Les dates indisponibles sont lues en temps réel depuis Firestore
+     (js/availability.js). Elles sont gérées depuis admin.html — plus
+     aucun fichier JSON à remplacer manuellement.
      ========================================================= */
   let bookedDates = [];
-  fetch('data/disponibilites.json')
-    .then(r => r.ok ? r.json() : [])
-    .then(dates => { bookedDates = Array.isArray(dates) ? dates : []; renderCalendar(); })
-    .catch(() => { bookedDates = []; });
+  if (window.RRAvailability) {
+    RRAvailability.subscribe((dates) => {
+      bookedDates = dates;
+      renderCalendar();
+    });
+  } else {
+    console.error('RR Location : système de disponibilités indisponible.');
+  }
 
   const dayMs = 24 * 60 * 60 * 1000;
   const toKey = (d) => {

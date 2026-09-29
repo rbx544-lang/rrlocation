@@ -4,184 +4,571 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>RR Location — Gestion des disponibilités (privé)</title>
+<title>RR Location — Administration</title>
+<link rel="icon" href="images/rr-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 <style>
   :root{
-    --bg:#0b0b0d; --card:#18181e; --card-line:rgba(255,255,255,.08);
+    --bg:#0b0b0d; --bg-soft:#131318; --card:#18181e; --card-line:rgba(255,255,255,.08);
     --red:#e2141f; --red-dim:#8f0f18; --text:#f5f3ee; --text-dim:#a3a3ab;
-    --text-faint:#6b6b73; --radius:18px; --green:#2fae62;
+    --text-faint:#6b6b73; --radius:16px; --green:#2fae62;
+    --ease: cubic-bezier(.22,1,.36,1);
   }
   *{ margin:0; padding:0; box-sizing:border-box; }
-  body{ background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; padding:32px 18px 80px; }
-  h1{ font-family:'Space Grotesk',sans-serif; font-size:26px; margin-bottom:6px; }
-  .wrap{ max-width:640px; margin:0 auto; }
-  .sub{ color:var(--text-dim); font-size:14px; margin-bottom:28px; line-height:1.5; }
+  body{ background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; }
+  h1,h2,h3{ font-family:'Space Grotesk',sans-serif; font-weight:600; }
+  button{ font-family:inherit; cursor:pointer; }
+  input{ font-family:inherit; }
+  a{ color:inherit; text-decoration:none; }
+
+  /* ---------- login ---------- */
+  #loginScreen{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .login-card{
+    width:100%; max-width:380px; background:var(--card); border:1px solid var(--card-line);
+    border-radius:var(--radius); padding:32px 28px;
+  }
+  .login-brand{ display:flex; align-items:center; gap:10px; margin-bottom:22px; }
+  .login-brand img{ width:34px; height:34px; object-fit:contain; }
+  .login-brand span{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; }
+  .login-brand em{ color:var(--red); font-style:normal; }
+  .login-card p.sub{ color:var(--text-dim); font-size:13.5px; margin-bottom:22px; line-height:1.5; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12.5px; color:var(--text-dim); margin-bottom:6px; }
+  .field input{
+    width:100%; background:var(--bg-soft); border:1px solid var(--card-line); color:var(--text);
+    padding:12px 14px; border-radius:10px; font-size:14px;
+  }
+  .field input:focus{ outline:none; border-color:var(--red-dim); }
+  .login-error{ color:#ff6b6b; font-size:13px; margin:4px 0 14px; min-height:16px; }
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:13px 20px; border-radius:11px; font-weight:600; font-size:14px;
+    border:1px solid var(--card-line); background:transparent; color:var(--text); transition:all .18s var(--ease);
+  }
+  .btn:hover{ background:rgba(255,255,255,.06); }
+  .btn-accent{ background:var(--red); border-color:var(--red); color:#fff; width:100%; }
+  .btn-accent:hover{ background:var(--red-dim); }
+  .btn-block{ width:100%; }
+
+  .setup-note{
+    margin-top:20px; padding-top:16px; border-top:1px dashed var(--card-line);
+    font-size:12px; color:var(--text-faint); line-height:1.6;
+  }
+  .setup-note code{ background:rgba(255,255,255,.06); padding:1px 5px; border-radius:5px; }
+
+  /* ---------- app shell ---------- */
+  #app{ display:none; min-height:100vh; }
+  #app.ready{ display:flex; }
+
+  .sidebar{
+    width:230px; flex-shrink:0; background:var(--bg-soft); border-right:1px solid var(--card-line);
+    padding:22px 16px; display:flex; flex-direction:column; position:sticky; top:0; height:100vh;
+  }
+  .sidebar-brand{ display:flex; align-items:center; gap:10px; padding:0 8px 22px; }
+  .sidebar-brand img{ width:30px; height:30px; object-fit:contain; }
+  .sidebar-brand div{ line-height:1.2; }
+  .sidebar-brand strong{ font-family:'Space Grotesk',sans-serif; font-size:14.5px; }
+  .sidebar-brand span{ font-size:11px; color:var(--text-faint); }
+
+  .sidebar-nav{ display:flex; flex-direction:column; gap:2px; flex:1; }
+  .sidebar-nav button{
+    display:flex; align-items:center; gap:11px; text-align:left; padding:11px 12px;
+    border-radius:10px; background:none; border:none; color:var(--text-dim); font-size:14px; font-weight:500;
+  }
+  .sidebar-nav button i{ width:16px; text-align:center; color:var(--text-faint); }
+  .sidebar-nav button:hover{ background:rgba(255,255,255,.04); color:var(--text); }
+  .sidebar-nav button.active{ background:rgba(226,20,31,.12); color:#fff; }
+  .sidebar-nav button.active i{ color:var(--red); }
+
+  .sidebar-foot{ padding-top:14px; border-top:1px solid var(--card-line); }
+  .sidebar-foot .who{ font-size:11.5px; color:var(--text-faint); padding:0 12px 10px; word-break:break-all; }
+  .sidebar-foot button{ width:100%; }
+
+  .main{ flex:1; padding:32px clamp(18px,4vw,44px) 80px; max-width:980px; }
+  .page{ display:none; animation:fadeIn .35s var(--ease); }
+  .page.active{ display:block; }
+  @keyframes fadeIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+
+  .page-head{ margin-bottom:26px; }
+  .page-head h1{ font-size:24px; margin-bottom:6px; }
+  .page-head p{ color:var(--text-dim); font-size:14px; }
+
   .card{ background:var(--card); border:1px solid var(--card-line); border-radius:var(--radius); padding:22px; }
+  .card + .card{ margin-top:16px; }
+  .card h3{ font-size:15px; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+  .card h3 i{ color:var(--red); font-size:13px; }
+
+  /* dashboard stat grid */
+  .stat-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-bottom:16px; }
+  .stat-card{ background:var(--card); border:1px solid var(--card-line); border-radius:var(--radius); padding:20px; }
+  .stat-card .num{ font-family:'Space Grotesk',sans-serif; font-size:30px; font-weight:700; }
+  .stat-card .label{ font-size:12.5px; color:var(--text-dim); margin-top:4px; }
+
+  .quick-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+  .quick-actions .btn{ flex:1; min-width:170px; }
+
+  .next-blocked-list{ list-style:none; }
+  .next-blocked-list li{
+    display:flex; align-items:center; gap:10px; padding:9px 0;
+    border-bottom:1px solid var(--card-line); font-size:13.5px; color:var(--text-dim);
+  }
+  .next-blocked-list li:last-child{ border-bottom:none; }
+  .next-blocked-list li strong{ color:var(--text); font-weight:600; }
+  .empty-hint{ font-size:13px; color:var(--text-faint); padding:6px 0; }
+
+  /* calendar */
   .cal-nav{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
-  .cal-nav button{ background:none; border:none; color:var(--text); font-size:16px; cursor:pointer; width:38px; height:38px; border-radius:10px; }
+  .cal-nav button{ background:none; border:none; color:var(--text); font-size:15px; width:36px; height:36px; border-radius:9px; }
   .cal-nav button:hover{ background:rgba(255,255,255,.08); }
-  .cal-nav p{ font-family:'Space Grotesk',sans-serif; font-weight:600; text-transform:capitalize; }
-  .weekdays{ display:grid; grid-template-columns:repeat(7,1fr); text-align:center; color:var(--text-faint); font-size:12px; margin-bottom:6px; }
+  .cal-nav p{ font-family:'Space Grotesk',sans-serif; font-weight:600; text-transform:capitalize; font-size:15px; }
+  .weekdays{ display:grid; grid-template-columns:repeat(7,1fr); text-align:center; color:var(--text-faint); font-size:11.5px; margin-bottom:6px; }
   .grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
-  .day{ aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:10px; font-size:14px; cursor:pointer; background:rgba(255,255,255,.03); border:1px solid transparent; transition:all .15s; user-select:none; }
+  .day{ aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:9px; font-size:13.5px; cursor:pointer; background:rgba(255,255,255,.03); border:1px solid transparent; transition:all .15s; user-select:none; }
   .day:hover{ border-color:var(--text-faint); }
   .day.empty{ visibility:hidden; cursor:default; }
   .day.past{ color:var(--text-faint); opacity:.35; cursor:default; pointer-events:none; }
   .day.blocked{ background:var(--red-dim); color:#fff; font-weight:600; }
   .day.today{ box-shadow:inset 0 0 0 1px var(--text-dim); }
-  .legend{ display:flex; gap:18px; margin-top:16px; font-size:12px; color:var(--text-dim); }
+  .legend{ display:flex; gap:18px; margin-top:14px; font-size:12px; color:var(--text-dim); }
   .legend span{ display:flex; align-items:center; gap:6px; }
-  .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; }
+  .dot{ width:9px; height:9px; border-radius:50%; display:inline-block; }
   .dot.blocked{ background:var(--red-dim); }
   .dot.free{ background:rgba(255,255,255,.15); }
-  .actions{ display:flex; gap:12px; margin-top:24px; flex-wrap:wrap; }
-  .btn{ flex:1; min-width:180px; padding:14px 18px; border-radius:12px; font-weight:600; font-size:14px; cursor:pointer; border:1px solid var(--card-line); background:transparent; color:var(--text); text-align:center; }
-  .btn-accent{ background:var(--red); border-color:var(--red); color:#fff; }
-  .btn-accent:hover{ background:var(--red-dim); }
-  .btn:hover{ background:rgba(255,255,255,.06); }
-  .count{ font-size:13px; color:var(--text-dim); margin-top:14px; }
-  .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--green); color:#fff; padding:12px 20px; border-radius:10px; font-size:14px; font-weight:600; opacity:0; pointer-events:none; transition:all .25s; }
+  .count{ font-size:12.5px; color:var(--text-dim); margin-top:12px; }
+  .cal-saving{ font-size:12px; color:var(--text-faint); margin-top:8px; min-height:16px; }
+
+  /* period form */
+  .period-form{ display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; }
+  .period-form .field{ margin-bottom:0; flex:1; min-width:150px; }
+  .period-form .btn-row{ display:flex; gap:10px; }
+
+  .placeholder-card{ text-align:center; padding:44px 20px; color:var(--text-dim); }
+  .placeholder-card i{ font-size:26px; color:var(--red-dim); margin-bottom:12px; display:block; }
+  .placeholder-card p{ font-size:13.5px; line-height:1.6; max-width:420px; margin:6px auto 0; }
+
+  .info-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; }
+  .info-grid div{ background:var(--bg-soft); border:1px solid var(--card-line); border-radius:12px; padding:14px; }
+  .info-grid .num{ font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:700; }
+  .info-grid .label{ font-size:11.5px; color:var(--text-dim); margin-top:2px; }
+
+  .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--green); color:#fff; padding:12px 20px; border-radius:10px; font-size:14px; font-weight:600; opacity:0; pointer-events:none; transition:all .25s; z-index:50; }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
-  .file-input{ display:none; }
-  code{ background:rgba(255,255,255,.06); padding:2px 6px; border-radius:6px; font-size:12.5px; }
+  .toast.error{ background:#c92c2c; }
+
+  @media (max-width: 860px){
+    #app.ready{ flex-direction:column; }
+    .sidebar{ width:100%; height:auto; position:relative; flex-direction:row; align-items:center; padding:14px 16px; overflow-x:auto; }
+    .sidebar-brand{ padding:0 14px 0 0; }
+    .sidebar-nav{ flex-direction:row; }
+    .sidebar-nav button span{ display:none; }
+    .sidebar-nav button{ padding:10px; }
+    .sidebar-foot{ border-top:none; padding-top:0; margin-left:auto; display:flex; align-items:center; }
+    .sidebar-foot .who{ display:none; }
+    .sidebar-foot button{ width:auto; padding:10px 14px; }
+    .main{ padding:22px 16px 70px; }
+  }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>Gestion des disponibilités</h1>
-    <p class="sub">
-      Cliquez sur les jours où la Clio n'est <strong>pas</strong> disponible (déjà réservée, entretien, etc.).
-      Un clic bloque le jour, un second clic le débloque. Une fois terminé, cliquez sur
-      <strong>« Télécharger le fichier »</strong> puis remplacez <code>data/disponibilites.json</code>
-      dans votre site par le fichier téléchargé. Cette page n'est pas liée depuis le site public —
-      gardez son adresse pour vous uniquement.
-    </p>
 
-    <div class="card">
-      <div class="cal-nav">
-        <button id="prevMonth" aria-label="Mois précédent"><i class="fa-solid fa-chevron-left"></i></button>
-        <p id="calLabel">—</p>
-        <button id="nextMonth" aria-label="Mois suivant"><i class="fa-solid fa-chevron-right"></i></button>
-      </div>
-      <div class="weekdays"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
-      <div id="grid" class="grid"></div>
-      <div class="legend">
-        <span><i class="dot free"></i> Disponible</span>
-        <span><i class="dot blocked"></i> Indisponible</span>
-      </div>
-      <p class="count" id="countLabel">0 jour bloqué</p>
+<!-- ÉCRAN DE CONNEXION -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-brand">
+      <img src="images/rr-logo.png" alt="">
+      <span>RR<em>Location</em> — Admin</span>
     </div>
+    <p class="sub">Espace privé de gestion de la Renault Clio 5. Connectez-vous avec votre compte administrateur.</p>
 
-    <div class="actions">
-      <button class="btn" id="importBtn"><i class="fa-solid fa-upload"></i>&nbsp; Importer le fichier actuel</button>
-      <button class="btn btn-accent" id="downloadBtn"><i class="fa-solid fa-download"></i>&nbsp; Télécharger le fichier</button>
+    <form id="loginForm">
+      <div class="field">
+        <label for="loginEmail">E-mail</label>
+        <input type="email" id="loginEmail" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="loginPassword">Mot de passe</label>
+        <input type="password" id="loginPassword" autocomplete="current-password" required>
+      </div>
+      <p class="login-error" id="loginError"></p>
+      <button type="submit" class="btn btn-accent" id="loginSubmit">Se connecter</button>
+    </form>
+
+    <div class="setup-note">
+      Première utilisation ? Ce tableau de bord a besoin d'un projet Firebase gratuit
+      pour stocker les disponibilités de façon persistante. Ouvrez <code>js/firebase-config.js</code>
+      et suivez les instructions qui s'y trouvent, puis créez votre compte admin dans
+      Firebase → Authentication → Users.
     </div>
-    <input type="file" id="fileInput" class="file-input" accept="application/json">
   </div>
+</div>
 
-  <div class="toast" id="toast">Fichier téléchargé</div>
+<!-- APPLICATION -->
+<div id="app">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="images/rr-logo.png" alt="">
+      <div><strong>RR Location</strong><br><span>Tableau de bord</span></div>
+    </div>
 
+    <nav class="sidebar-nav">
+      <button data-page="dashboard" class="active"><i class="fa-solid fa-grip"></i><span>Tableau de bord</span></button>
+      <button data-page="dispo"><i class="fa-solid fa-calendar-days"></i><span>Disponibilités</span></button>
+      <button data-page="reservations"><i class="fa-solid fa-inbox"></i><span>Réservations</span></button>
+      <button data-page="tarifs"><i class="fa-solid fa-tag"></i><span>Tarifs</span></button>
+      <button data-page="vehicule"><i class="fa-solid fa-car"></i><span>Véhicule</span></button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <p class="who" id="whoAmI"></p>
+      <button class="btn" id="logoutBtn"><i class="fa-solid fa-arrow-right-from-bracket"></i>&nbsp; Déconnexion</button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- TABLEAU DE BORD -->
+    <section class="page active" id="page-dashboard">
+      <div class="page-head">
+        <h1>Tableau de bord</h1>
+        <p>Vue d'ensemble de la Clio 5 et de ses disponibilités.</p>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card"><div class="num" id="statBlocked">—</div><div class="label">Jours indisponibles</div></div>
+        <div class="stat-card"><div class="num" id="statNext">—</div><div class="label">Prochain jour bloqué</div></div>
+        <div class="stat-card"><div class="num">50€</div><div class="label">Tarif dès 7 jours</div></div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-bolt"></i> Raccourcis rapides</h3>
+        <div class="quick-actions">
+          <button class="btn" id="qaToday"><i class="fa-solid fa-ban"></i>&nbsp; Bloquer aujourd'hui</button>
+          <button class="btn" id="qaWeek"><i class="fa-solid fa-calendar-week"></i>&nbsp; Bloquer cette semaine</button>
+          <button class="btn" id="qaGoDispo"><i class="fa-solid fa-calendar-plus"></i>&nbsp; Ajouter une indisponibilité</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-calendar-xmark"></i> Prochaines dates bloquées</h3>
+        <ul class="next-blocked-list" id="nextBlockedList"></ul>
+      </div>
+    </section>
+
+    <!-- DISPONIBILITÉS -->
+    <section class="page" id="page-dispo">
+      <div class="page-head">
+        <h1>Disponibilités</h1>
+        <p>Cliquez sur un jour pour le bloquer ou le débloquer. Les changements sont enregistrés immédiatement et s'appliquent en direct sur le calendrier du site.</p>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-calendar-days"></i> Calendrier</h3>
+        <div class="cal-nav">
+          <button id="prevMonth" aria-label="Mois précédent"><i class="fa-solid fa-chevron-left"></i></button>
+          <p id="calLabel">—</p>
+          <button id="nextMonth" aria-label="Mois suivant"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+        <div class="weekdays"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+        <div id="grid" class="grid"></div>
+        <div class="legend">
+          <span><i class="dot free"></i> Disponible</span>
+          <span><i class="dot blocked"></i> Indisponible</span>
+        </div>
+        <p class="count" id="countLabel">0 jour bloqué</p>
+        <p class="cal-saving" id="calSaving"></p>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-layer-group"></i> Bloquer / débloquer une période</h3>
+        <form class="period-form" id="periodForm">
+          <div class="field">
+            <label for="periodStart">Date de début</label>
+            <input type="date" id="periodStart" required>
+          </div>
+          <div class="field">
+            <label for="periodEnd">Date de fin</label>
+            <input type="date" id="periodEnd" required>
+          </div>
+          <div class="btn-row">
+            <button type="submit" class="btn btn-accent" id="blockPeriodBtn"><i class="fa-solid fa-lock"></i>&nbsp; Bloquer</button>
+            <button type="button" class="btn" id="unblockPeriodBtn"><i class="fa-solid fa-lock-open"></i>&nbsp; Rendre disponible</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- RÉSERVATIONS -->
+    <section class="page" id="page-reservations">
+      <div class="page-head">
+        <h1>Réservations</h1>
+        <p>Demandes de réservation envoyées depuis le site.</p>
+      </div>
+      <div class="card placeholder-card">
+        <i class="fa-solid fa-inbox"></i>
+        <h3>Aucune boîte de réservation connectée</h3>
+        <p>Les demandes de réservation sont envoyées directement par SMS depuis le formulaire du site (pas de paiement en ligne). Pour centraliser les demandes ici, il faudra brancher un stockage dédié (Firestore) sur le formulaire de réservation.</p>
+      </div>
+    </section>
+
+    <!-- TARIFS -->
+    <section class="page" id="page-tarifs">
+      <div class="page-head">
+        <h1>Tarifs</h1>
+        <p>Grille tarifaire actuellement affichée sur le site.</p>
+      </div>
+      <div class="card">
+        <h3><i class="fa-solid fa-tag"></i> Grille actuelle</h3>
+        <div class="info-grid">
+          <div><div class="num">60€</div><div class="label">Par jour</div></div>
+          <div><div class="num">50€</div><div class="label">Par jour, dès 7 jours</div></div>
+          <div><div class="num">1050€</div><div class="label">Forfait mensuel</div></div>
+          <div><div class="num">1000€</div><div class="label">Caution</div></div>
+          <div><div class="num">∞</div><div class="label">Kilométrage</div></div>
+        </div>
+        <p class="empty-hint" style="margin-top:14px;">Ces tarifs sont définis dans <code>js/main.js</code> (fonction <code>priceFor</code>) et dans la section Tarifs de <code>index.html</code>. Dites-moi si vous voulez pouvoir les modifier directement depuis cette page.</p>
+      </div>
+    </section>
+
+    <!-- VÉHICULE -->
+    <section class="page" id="page-vehicule">
+      <div class="page-head">
+        <h1>Véhicule</h1>
+        <p>Fiche du véhicule actuellement en location.</p>
+      </div>
+      <div class="card">
+        <h3><i class="fa-solid fa-car"></i> Renault Clio 5</h3>
+        <div class="info-grid">
+          <div><div class="num">101</div><div class="label">Chevaux</div></div>
+          <div><div class="num">2019</div><div class="label">Année</div></div>
+          <div><div class="num">M5</div><div class="label">Boîte manuelle</div></div>
+          <div><div class="num">∞</div><div class="label">Km illimité</div></div>
+        </div>
+        <p class="empty-hint" style="margin-top:14px;">Fiche technique, équipements et photos sont gérés dans la section « Le véhicule » de <code>index.html</code>.</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast">Enregistré</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/availability.js"></script>
 <script>
 (function(){
-  const today = new Date(); today.setHours(0,0,0,0);
-  let viewYear = today.getFullYear();
-  let viewMonth = today.getMonth();
-  let blocked = new Set();
 
-  const grid = document.getElementById('grid');
-  const calLabel = document.getElementById('calLabel');
-  const countLabel = document.getElementById('countLabel');
-  const monthFmt = new Intl.DateTimeFormat('fr-FR', { month:'long', year:'numeric' });
-
-  const toKey = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-
-  function render(){
-    grid.innerHTML = '';
-    calLabel.textContent = monthFmt.format(new Date(viewYear, viewMonth, 1));
-    const firstDay = new Date(viewYear, viewMonth, 1);
-    const offset = (firstDay.getDay() + 6) % 7;
-    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-
-    for (let i = 0; i < offset; i++){
-      const e = document.createElement('div');
-      e.className = 'day empty';
-      grid.appendChild(e);
-    }
-    for (let d = 1; d <= daysInMonth; d++){
-      const date = new Date(viewYear, viewMonth, d);
-      const key = toKey(date);
-      const cell = document.createElement('div');
-      cell.className = 'day';
-      cell.textContent = d;
-      if (date.getTime() === today.getTime()) cell.classList.add('today');
-      if (date < today) cell.classList.add('past');
-      if (blocked.has(key)) cell.classList.add('blocked');
-      cell.addEventListener('click', () => {
-        if (date < today) return;
-        blocked.has(key) ? blocked.delete(key) : blocked.add(key);
-        render();
-      });
-      grid.appendChild(cell);
-    }
-    countLabel.textContent = blocked.size + (blocked.size > 1 ? ' jours bloqués' : ' jour bloqué');
-  }
-
-  document.getElementById('prevMonth').addEventListener('click', () => {
-    viewMonth--; if (viewMonth < 0){ viewMonth = 11; viewYear--; } render();
-  });
-  document.getElementById('nextMonth').addEventListener('click', () => {
-    viewMonth++; if (viewMonth > 11){ viewMonth = 0; viewYear++; } render();
-  });
-
-  function showToast(msg){
+  function showToast(msg, isError){
     const t = document.getElementById('toast');
     t.textContent = msg;
+    t.classList.toggle('error', !!isError);
     t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2200);
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => t.classList.remove('show'), 2400);
   }
 
-  document.getElementById('downloadBtn').addEventListener('click', () => {
-    const dates = Array.from(blocked).sort();
-    const blob = new Blob([JSON.stringify(dates, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'disponibilites.json';
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast('Fichier téléchargé — remplacez data/disponibilites.json');
-  });
+  /* ---------- navigation ---------- */
+  const navButtons = document.querySelectorAll('.sidebar-nav button[data-page]');
+  function goToPage(name){
+    navButtons.forEach(b => b.classList.toggle('active', b.dataset.page === name));
+    document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + name));
+  }
+  navButtons.forEach(b => b.addEventListener('click', () => goToPage(b.dataset.page)));
+  document.getElementById('qaGoDispo').addEventListener('click', () => goToPage('dispo'));
 
-  const fileInput = document.getElementById('fileInput');
-  document.getElementById('importBtn').addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', () => {
-    const file = fileInput.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const dates = JSON.parse(reader.result);
-        blocked = new Set(Array.isArray(dates) ? dates : []);
-        render();
-        showToast('Fichier importé');
-      } catch (e) {
-        showToast('Fichier invalide');
+  /* ---------- connexion ---------- */
+  const loginScreen = document.getElementById('loginScreen');
+  const appEl = document.getElementById('app');
+  const loginForm = document.getElementById('loginForm');
+  const loginError = document.getElementById('loginError');
+  const loginSubmit = document.getElementById('loginSubmit');
+
+  if (!window.RRAvailability) {
+    loginError.textContent = "Connexion au service de disponibilités impossible. Vérifiez js/firebase-config.js.";
+  } else {
+    RRAvailability.onAuthChange((user) => {
+      if (user) {
+        loginScreen.style.display = 'none';
+        appEl.classList.add('ready');
+        document.getElementById('whoAmI').textContent = user.email || '';
+        initDashboard();
+      } else {
+        loginScreen.style.display = 'flex';
+        appEl.classList.remove('ready');
       }
-    };
-    reader.readAsText(file);
-    fileInput.value = '';
-  });
+    });
 
-  // essaie de pré-charger le fichier existant du site (s'il est servi
-  // depuis le même dossier, via http:// et non file://)
-  fetch('data/disponibilites.json')
-    .then(r => r.ok ? r.json() : [])
-    .then(dates => { blocked = new Set(Array.isArray(dates) ? dates : []); render(); })
-    .catch(() => render());
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      loginError.textContent = '';
+      loginSubmit.textContent = 'Connexion…';
+      try {
+        await RRAvailability.signIn(
+          document.getElementById('loginEmail').value.trim(),
+          document.getElementById('loginPassword').value
+        );
+      } catch (err) {
+        loginError.textContent = "Identifiants incorrects ou compte inexistant.";
+      }
+      loginSubmit.textContent = 'Se connecter';
+    });
 
-  render();
+    document.getElementById('logoutBtn').addEventListener('click', () => RRAvailability.signOut());
+  }
+
+  /* ---------- tableau de bord + calendrier (initialisés une fois connecté) ---------- */
+  let dashboardInitialized = false;
+
+  function initDashboard(){
+    if (dashboardInitialized) return;
+    dashboardInitialized = true;
+
+    const today = new Date(); today.setHours(0,0,0,0);
+    let viewYear = today.getFullYear();
+    let viewMonth = today.getMonth();
+    let blocked = [];
+
+    const grid = document.getElementById('grid');
+    const calLabel = document.getElementById('calLabel');
+    const countLabel = document.getElementById('countLabel');
+    const calSaving = document.getElementById('calSaving');
+    const monthFmt = new Intl.DateTimeFormat('fr-FR', { month:'long', year:'numeric' });
+    const dayFmt = new Intl.DateTimeFormat('fr-FR', { weekday:'short', day:'numeric', month:'short' });
+
+    function render(){
+      grid.innerHTML = '';
+      calLabel.textContent = monthFmt.format(new Date(viewYear, viewMonth, 1));
+      const firstDay = new Date(viewYear, viewMonth, 1);
+      const offset = (firstDay.getDay() + 6) % 7;
+      const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+      const blockedSet = new Set(blocked);
+
+      for (let i = 0; i < offset; i++){
+        const e = document.createElement('div');
+        e.className = 'day empty';
+        grid.appendChild(e);
+      }
+      for (let d = 1; d <= daysInMonth; d++){
+        const date = new Date(viewYear, viewMonth, d);
+        const key = RRAvailability.toKey(date);
+        const cell = document.createElement('div');
+        cell.className = 'day';
+        cell.textContent = d;
+        if (date.getTime() === today.getTime()) cell.classList.add('today');
+        if (date < today) cell.classList.add('past');
+        if (blockedSet.has(key)) cell.classList.add('blocked');
+        cell.addEventListener('click', async () => {
+          if (date < today) return;
+          try {
+            await RRAvailability.toggleDate(key);
+            calSaving.textContent = 'Enregistré ✓';
+            setTimeout(() => { calSaving.textContent = ''; }, 1500);
+          } catch (err) {
+            showToast("Échec de l'enregistrement.", true);
+          }
+        });
+        grid.appendChild(cell);
+      }
+      countLabel.textContent = blocked.length + (blocked.length > 1 ? ' jours bloqués' : ' jour bloqué');
+      updateDashboardStats();
+    }
+
+    function updateDashboardStats(){
+      const future = blocked.filter(k => new Date(k + 'T00:00:00') >= today).sort();
+      document.getElementById('statBlocked').textContent = blocked.length;
+      document.getElementById('statNext').textContent = future.length
+        ? dayFmt.format(new Date(future[0] + 'T00:00:00'))
+        : '—';
+
+      const list = document.getElementById('nextBlockedList');
+      const ranges = toRanges(future).slice(0, 6);
+      if (!ranges.length){
+        list.innerHTML = '<li class="empty-hint">Aucune date bloquée à venir.</li>';
+      } else {
+        list.innerHTML = ranges.map(r => {
+          const label = r.start === r.end
+            ? dayFmt.format(new Date(r.start + 'T00:00:00'))
+            : `${dayFmt.format(new Date(r.start + 'T00:00:00'))} → ${dayFmt.format(new Date(r.end + 'T00:00:00'))}`;
+          return `<li><strong>${label}</strong></li>`;
+        }).join('');
+      }
+    }
+
+    // regroupe une liste de dates triées en périodes consécutives, pour un affichage lisible
+    function toRanges(sortedKeys){
+      const ranges = [];
+      let start = null, prev = null;
+      const dayMs = 86400000;
+      sortedKeys.forEach(k => {
+        const t = new Date(k + 'T00:00:00').getTime();
+        if (start === null){ start = k; prev = t; return; }
+        if (t - prev === dayMs){ prev = t; return; }
+        ranges.push({ start, end: new Date(prev).toISOString().slice(0,10) });
+        start = k; prev = t;
+      });
+      if (start !== null) ranges.push({ start, end: new Date(prev).toISOString().slice(0,10) });
+      return ranges;
+    }
+
+    RRAvailability.subscribe((dates) => {
+      blocked = dates;
+      render();
+    });
+
+    document.getElementById('prevMonth').addEventListener('click', () => {
+      viewMonth--; if (viewMonth < 0){ viewMonth = 11; viewYear--; } render();
+    });
+    document.getElementById('nextMonth').addEventListener('click', () => {
+      viewMonth++; if (viewMonth > 11){ viewMonth = 0; viewYear++; } render();
+    });
+
+    /* ---------- raccourcis rapides ---------- */
+    document.getElementById('qaToday').addEventListener('click', async () => {
+      try {
+        await RRAvailability.blockDates([RRAvailability.toKey(today)]);
+        showToast("Aujourd'hui bloqué.");
+      } catch { showToast('Échec.', true); }
+    });
+
+    document.getElementById('qaWeek').addEventListener('click', async () => {
+      const monday = new Date(today);
+      monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+      const sunday = new Date(monday); sunday.setDate(sunday.getDate() + 6);
+      try {
+        await RRAvailability.blockDates(RRAvailability.rangeKeys(monday, sunday));
+        showToast('Semaine en cours bloquée.');
+      } catch { showToast('Échec.', true); }
+    });
+
+    /* ---------- bloquer / débloquer une période ---------- */
+    document.getElementById('blockPeriodBtn').addEventListener('click', async (e) => {
+      e.preventDefault();
+      const s = document.getElementById('periodStart').value;
+      const en = document.getElementById('periodEnd').value;
+      if (!s || !en || s > en) { showToast('Période invalide.', true); return; }
+      try {
+        await RRAvailability.blockDates(RRAvailability.rangeKeys(new Date(s + 'T00:00:00'), new Date(en + 'T00:00:00')));
+        showToast('Période bloquée.');
+      } catch { showToast('Échec.', true); }
+    });
+    document.getElementById('unblockPeriodBtn').addEventListener('click', async () => {
+      const s = document.getElementById('periodStart').value;
+      const en = document.getElementById('periodEnd').value;
+      if (!s || !en || s > en) { showToast('Période invalide.', true); return; }
+      try {
+        await RRAvailability.unblockDates(RRAvailability.rangeKeys(new Date(s + 'T00:00:00'), new Date(en + 'T00:00:00')));
+        showToast('Période rendue disponible.');
+      } catch { showToast('Échec.', true); }
+    });
+  }
+
 })();
 </script>
 </body>
