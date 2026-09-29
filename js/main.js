@@ -91,6 +91,13 @@ document.addEventListener('DOMContentLoaded', () => {
     return nights * 60;
   }
 
+  // Texte d'affichage uniquement (n'influence jamais le calcul ci-dessus).
+  function nightsSummary(nights){
+    if (nights >= 28) return `${nights} jours · forfait mensuel`;
+    if (nights >= 7) return `${nights} jours × 50€/jour`;
+    return `${nights} jour${nights > 1 ? 's' : ''} × 60€/jour`;
+  }
+
   function renderCalendar(){
     calendarGrid.innerHTML = '';
     calendarLabel.textContent = monthLabelFmt.format(new Date(viewYear, viewMonth, 1));
@@ -165,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (startDate && endDate){
       const nights = Math.round((endDate - startDate) / dayMs);
       const total = priceFor(nights);
-      nightsLabel.textContent = `${nights} jour${nights > 1 ? 's' : ''}`;
+      nightsLabel.textContent = nightsSummary(nights);
       totalLabel.textContent = `${total} €`;
     } else {
       nightsLabel.textContent = '0 jour';
@@ -210,5 +217,49 @@ document.addEventListener('DOMContentLoaded', () => {
     // Pas de serveur : la demande est transmise par SMS au propriétaire.
     window.location.href = `sms:0662481112?&body=${encodeURIComponent(message)}`;
   });
+
+  /* ---------- révélation au scroll (discrète) ---------- */
+  const revealEls = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window && revealEls.length){
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting){
+          entry.target.classList.add('in-view');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+    revealEls.forEach(el => io.observe(el));
+  } else {
+    revealEls.forEach(el => el.classList.add('in-view'));
+  }
+
+  /* =========================================================
+     AVIS GOOGLE — prêt à recevoir des avis réels
+
+     Aucun avis n'est affiché tant qu'aucune donnée réelle n'est
+     fournie (pas d'avis inventés). Pour activer l'affichage,
+     une fois un widget Google ou l'API Google Places configuré,
+     appelez renderGoogleReviews() avec un tableau d'avis réels,
+     par ex. :
+
+     renderGoogleReviews([
+       { author: "Prénom N.", rating: 5, text: "…", date: "il y a 2 semaines" }
+     ]);
+     ========================================================= */
+  function renderGoogleReviews(reviews){
+    const container = document.getElementById('googleReviews');
+    if (!container || !Array.isArray(reviews) || !reviews.length) return;
+
+    container.innerHTML = reviews.map(r => `
+      <div class="review-card">
+        <div class="review-stars">${'★'.repeat(Math.max(0, Math.min(5, r.rating || 0)))}${'☆'.repeat(5 - Math.max(0, Math.min(5, r.rating || 0)))}</div>
+        <p>${(r.text || '').replace(/</g, '&lt;')}</p>
+        <div class="review-author"><strong>${(r.author || '').replace(/</g, '&lt;')}</strong><span>${(r.date || '').replace(/</g, '&lt;')}</span></div>
+      </div>
+    `).join('');
+    container.hidden = false;
+  }
+  window.renderGoogleReviews = renderGoogleReviews;
 
 });
